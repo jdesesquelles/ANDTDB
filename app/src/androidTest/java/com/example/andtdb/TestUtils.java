@@ -1,14 +1,50 @@
 package com.example.andtdb;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import android.content.ContentValues;
+import android.database.Cursor;
+
+import androidx.room.Entity;
+
 import com.example.andtdb.data.Table1;
+import com.example.andtdb.data.Table1Dao;
+
+import java.util.Map;
+import java.util.Set;
 
 public class TestUtils {
-    static final String TEST_TABLE1_ID = "0";
-    static final String TEST_TABLE1_COL1 = "test value table1 col1";
 
     public static Table1 createTable1(String col1){
-        Table1 table1 = new Table1(col1);
-        return table1;
+        return new Table1(col1);
+    }
+
+    public static void deleteAll(Table1Dao table1Dao){
+        table1Dao.deleteAll();
+    }
+    public static void validateCursor(String error, Cursor valueCursor, ContentValues expectedValues) {
+        assertTrue("Empty cursor returned. " + error, valueCursor.moveToFirst());
+        do{
+            validateCurrentRecord(error, valueCursor, expectedValues);
+        }while(valueCursor.moveToNext());
+        valueCursor.close();
+    }
+
+    public static void validateCurrentRecord(String error, Cursor valueCursor, ContentValues expectedValues) {
+        Set<Map.Entry<String, Object>> valueSet = expectedValues.valueSet();
+        for (Map.Entry<String, Object> entry : valueSet) {
+            String columnName = entry.getKey();
+
+            int idx = valueCursor.getColumnIndex(columnName);
+            assertFalse("Column '" + columnName + "' not found. " + error, idx == -1);
+
+            String expectedValue = entry.getValue().toString();
+            assertEquals("Value '" + valueCursor.getString(idx) +
+                    "' did not match the expected value '" +
+                    expectedValue + "'. " + error, expectedValue, valueCursor.getString(idx));
+        }
     }
 
    /* public static ContentValues createTable1ListValues() {

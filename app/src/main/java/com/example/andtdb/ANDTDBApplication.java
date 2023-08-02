@@ -8,11 +8,12 @@ import com.example.andtdb.data.Table1Database;
 
 public class ANDTDBApplication extends Application {
 
-    Table1Database db;
+    private Table1Database db;
 
     public void onCreate(){
         super.onCreate();
         db = Room.databaseBuilder(getApplicationContext(),
                 Table1Database.class, "andtdb1-database").build();
     }
+
 }

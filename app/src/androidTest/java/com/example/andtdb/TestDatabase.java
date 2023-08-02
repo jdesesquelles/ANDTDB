@@ -14,42 +14,31 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 import androidx.room.Room;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 import androidx.test.core.app.ApplicationProvider;
-import androidx.test.runner.AndroidJUnit4;
-
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.example.andtdb.data.Table1;
 import com.example.andtdb.data.Table1Dao;
 import com.example.andtdb.data.Table1Database;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @RunWith(AndroidJUnit4.class)
 public class TestDatabase {
 
+    // TODO : testupsert
+    // TODO : testUpsertAll
     @Rule
     public InstantTaskExecutorRule instantTaskExecutorRule = new InstantTaskExecutorRule();
 
-    //@Rule
-    //public UiThreadTestRule uiThreadTestRule = new UiThreadTestRule();
-
-    static final String TEST_TABLE1_ID = "0";
-    static final String TEST_TABLE1_COL1_LINE1 = "test value table1 col1 line1";
-    static final String TEST_TABLE1_COL1_LINE2 = "test value table1 col1 line2";
     private Table1Dao table1Dao;
     public Table1Database db;
     Context context;
     ArrayList<String> tableList;
-
     private Cursor cursor;
     private SupportSQLiteDatabase db_sql;
     String database_name = "table1_database";
@@ -156,8 +145,7 @@ public class TestDatabase {
         assertNotNull("Got DAO", table1Dao);
     }
 
-    // TODO : testupsert
-    // TODO : testUpsertAll
+
 
     @Test
     public void testFindByID(){
@@ -187,6 +175,13 @@ public class TestDatabase {
         table1Dao.deleteAll();
     }
 
+    public ContentValues createTable1TestValues(){
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("col1", TestConstant.TEST_TABLE1_COL1_LINE1);
+        contentValues.put("col1", TestConstant.TEST_TABLE1_COL1_LINE2);
+        return  contentValues;
+    }
+
     @Test
     public void test05InsertIntoTable1() {
         table1Dao.deleteAll();
@@ -200,19 +195,19 @@ public class TestDatabase {
         String tableName = "table1";
         //Create List Values
         ContentValues contentValues = new ContentValues();
-        contentValues.put("col1", TEST_TABLE1_COL1_LINE1);
-        contentValues.put("col1", TEST_TABLE1_COL1_LINE2);
+        contentValues.put("col1", TestConstant.TEST_TABLE1_COL1_LINE1);
+        contentValues.put("col1", TestConstant.TEST_TABLE1_COL1_LINE2);
 
         ArrayList<Table1> table1_values = new ArrayList<>();
-        table1_values.add(new Table1(TEST_TABLE1_COL1_LINE1));
-        table1_values.add(new Table1(TEST_TABLE1_COL1_LINE2));
+        table1_values.add(new Table1(TestConstant.TEST_TABLE1_COL1_LINE1));
+        table1_values.add(new Table1(TestConstant.TEST_TABLE1_COL1_LINE2));
 
         inserted_rows.add(table1Dao.insert(table1_values.get(0)));
         try {
             assertTrue("Table - " + tableName + " Inserting into table failed.", cursor.moveToFirst());
             cursor = db_sql.query("select * from table1 where id = " + inserted_rows.get(0).toString() + ")"); // select where parameter
             for (int i = 0; i < table1_values.size(); i++) {
-                validateCursor("Error: " + tableName + " Query Validation Failed", cursor, contentValues);
+                TestUtils.validateCursor("Error: " + tableName + " Query Validation Failed", cursor, contentValues);
                 assertFalse("Table - " + tableName + " validation of inserted data failed: Data found more than once", cursor.moveToNext());
             }
             cursor.close();
@@ -229,16 +224,13 @@ public class TestDatabase {
         String tableName = "table1";
         //Create List Values
         ContentValues contentValues = new ContentValues();
-        contentValues.put("col1", TEST_TABLE1_COL1_LINE2);
-
-        Table1 table1_value = new Table1(TEST_TABLE1_COL1_LINE1);
+        contentValues.put("col1", TestConstant.TEST_TABLE1_COL1_LINE2);
+        Table1 table1_value = new Table1(TestConstant.TEST_TABLE1_COL1_LINE1);
         table1_value.setId(table1Dao.insert(table1_value));
-        table1_value.col1 = TEST_TABLE1_COL1_LINE2;
+        table1_value.col1 = TestConstant.TEST_TABLE1_COL1_LINE2;
         table1Dao.update(table1_value);
-
-        //assertTrue("Table - " + tableName + " Inserting into table failed.", cursor.moveToFirst());
         cursor = db_sql.query("select * from table1 where id = " + table1_value.getId().toString()); // select where parameter
-        validateCursor("Error: " + tableName + " Query Validation Failed", cursor, contentValues);
+        TestUtils.validateCursor("Error: " + tableName + " Query Validation Failed", cursor, contentValues);
         assertFalse("Table - " + tableName + " validation of updated data failed: Data found more than once", cursor.moveToNext());
         cursor.close();
     }
@@ -266,29 +258,6 @@ public class TestDatabase {
         cursor = db_sql.query("select * from table1"); // select where parameter
         assertFalse(cursor.moveToFirst());
 
-    }
-
-    public static void validateCursor(String error, Cursor valueCursor, ContentValues expectedValues) {
-        assertTrue("Empty cursor returned. " + error, valueCursor.moveToFirst());
-        do{
-            validateCurrentRecord(error, valueCursor, expectedValues);
-        }while(valueCursor.moveToNext());
-        valueCursor.close();
-    }
-
-    public static void validateCurrentRecord(String error, Cursor valueCursor, ContentValues expectedValues) {
-        Set<Map.Entry<String, Object>> valueSet = expectedValues.valueSet();
-        for (Map.Entry<String, Object> entry : valueSet) {
-            String columnName = entry.getKey();
-
-            int idx = valueCursor.getColumnIndex(columnName);
-            assertFalse("Column '" + columnName + "' not found. " + error, idx == -1);
-
-            String expectedValue = entry.getValue().toString();
-            assertEquals("Value '" + valueCursor.getString(idx) +
-                    "' did not match the expected value '" +
-                    expectedValue + "'. " + error, expectedValue, valueCursor.getString(idx));
-        }
     }
 
     @After

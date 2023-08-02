@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">ANDTDB</string>
+    <string name="content_authority">com.example.andtdb</string>
+
 </resources>
