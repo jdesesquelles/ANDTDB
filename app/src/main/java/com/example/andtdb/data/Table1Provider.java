@@ -47,6 +47,7 @@ public class Table1Provider extends ContentProvider {
         // Here's the switch statement that, given a URI, will determine what kind of request it is,
         // and query the database accordingly.
         Cursor retCursor;
+
         switch (sUriMatcher.match(uri)) {
             // "weather/*/*"
             case TABLE1:

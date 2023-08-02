@@ -100,7 +100,6 @@ public class TestContentProvider {
                 null,
                 null,
                 null
-
         );
 
         // Make sure we get the correct cursor out of the database
