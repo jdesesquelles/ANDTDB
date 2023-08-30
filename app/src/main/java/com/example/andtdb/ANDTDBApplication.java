@@ -1,5 +1,7 @@
 package com.example.andtdb;
 
+import static com.example.andtdb.data.Table1Database.sRoomDatabaseCallback;
+
 import android.app.Application;
 
 import androidx.room.Room;
@@ -13,7 +15,9 @@ public class ANDTDBApplication extends Application {
     public void onCreate(){
         super.onCreate();
         db = Room.databaseBuilder(getApplicationContext(),
-                Table1Database.class, "andtdb1-database").build();
+                Table1Database.class, "andtdb1-database")
+                .addCallback(sRoomDatabaseCallback)
+                .build();
     }
 
 }
